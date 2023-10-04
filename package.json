@@ -1,0 +1,6 @@
+{
+    "scripts": {
+        "docker-start": "clear && docker-compose up -d --build",
+        "docker-stop": "clear && docker-compose down"
+    }
+}
