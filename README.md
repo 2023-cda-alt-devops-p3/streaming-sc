@@ -12,10 +12,11 @@ ORDER BY year DESC;
 
 ```sql
 SELECT lastname, firstname,
-YEAR(CURRENT_DATE()) - YEAR(birth_date) - (DATE_FORM(CURRENT_DATE(), '%m%d') < DATE_FORMAT(birth_date'%m%d')) AS age
+YEAR(CURRENT_DATE()) - YEAR(birth_date) - (DATE_FORMAT(CURRENT_DATE(), '%m%d') < DATE_FORMAT(birth_date, '%m%d')) AS age
 FROM actor
 WHERE YEAR(CURRENT_DATE()) - YEAR(birth_date) > 30
 ORDER BY lastname, firstname;
+
 ```
 
 ### la liste des acteurs/actrices principaux pour un film donné
