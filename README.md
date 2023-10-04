@@ -74,3 +74,26 @@ FROM actor
 ORDER BY id_actor DESC
 LIMIT 3;
 ```
+
+### lister grâce à une procédure stockée les films d'un réalisateur donné en paramètre
+
+```sql
+DELIMITER //
+
+CREATE PROCEDURE ListMoviesByDirector(IN directorName VARCHAR(255))
+BEGIN
+    SELECT m.title, m.year
+    FROM movie m
+    JOIN director d ON m.id_director = d.id_director
+    WHERE d.lastname = directorName;
+END;
+//
+
+DELIMITER ;
+```
+
+#### pour appeler la procédure stockée
+
+```sql
+CALL ListMoviesByDirector('Nom du Réalisateur');
+```
