@@ -99,3 +99,22 @@ DELIMITER ;
 ```sql
 CALL ListMoviesByDirector('Nom du Réalisateur');
 ```
+
+### Garder grâce à un trigger une trace de toutes les modifications apportées à la table des utilisateurs avec une table d'archives
+
+```sql
+DELIMITER //
+CREATE TRIGGER User_Audit_Trigger
+AFTER UPDATE ON user FOR EACH ROW
+BEGIN
+    INSERT INTO user_archive (user_id, action_date, old_value, new_value)
+    VALUES (
+        OLD.id_user,
+        NOW(),
+        CONCAT('Nom: ', OLD.last_name, ', Prénom: ', OLD.first_name),
+        CONCAT('Nom: ', NEW.last_name, ', Prénom: ', NEW.first_name)
+    );
+END;
+//
+DELIMITER ;
+```
