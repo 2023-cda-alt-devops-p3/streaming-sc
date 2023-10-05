@@ -1,3 +1,5 @@
+### Pour lancer ou stopper docker il y a deux scripts dans le package.json
+
 # Liste des jeu de requêtes
 
 ### les titres et dates de sortie des films du plus récent au plus ancien
