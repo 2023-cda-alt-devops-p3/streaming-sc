@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Hôte : db
--- Généré le : mer. 04 oct. 2023 à 11:50
+-- Généré le : jeu. 05 oct. 2023 à 12:17
 -- Version du serveur : 8.1.0
 -- Version de PHP : 8.2.11
 
@@ -20,6 +20,19 @@ SET time_zone = "+00:00";
 --
 -- Base de données : `streaming`
 --
+
+DELIMITER $$
+--
+-- Procédures
+--
+CREATE DEFINER=`root`@`%` PROCEDURE `ListMoviesByDirector` (IN `directorName` VARCHAR(255))   BEGIN
+    SELECT m.title, m.year
+    FROM movie m
+    JOIN director d ON m.id_director = d.id_director
+    WHERE d.lastname = directorName;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -155,9 +168,47 @@ CREATE TABLE `user` (
 --
 
 INSERT INTO `user` (`id_user`, `lastname`, `firstname`, `email`, `password`, `role`) VALUES
-(1, 'Dupont', 'Jean', 'jean.dupont@example.com', 'motdepasse1', 'Utilisateur'),
+(1, 'Dupont', 'Patrick', 'patrick.dupont@example.com', 'patrickleboss', 'Utilisateur'),
 (2, 'Martin', 'Sophie', 'sophie.martin@example.com', 'motdepasse2', 'Utilisateur'),
-(3, 'Garcia', 'Luis', 'luis.garcia@example.com', 'motdepasse3', 'Administrateur');
+(3, 'Pedro', 'Luis', 'luis.pedro@example.com', 'pedroluis13', 'Administrateur');
+
+--
+-- Déclencheurs `user`
+--
+DELIMITER $$
+CREATE TRIGGER `User_Audit_Trigger` AFTER UPDATE ON `user` FOR EACH ROW BEGIN
+    INSERT INTO user_archive (user_id, action_date, old_value, new_value)
+    VALUES (
+        OLD.id_user,
+        NOW(),
+        CONCAT('Nom: ', OLD.lastname, ', Prénom: ', OLD.firstname),
+        CONCAT('Nom: ', NEW.lastname, ', Prénom: ', NEW.firstname)
+    );
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure de la table `user_archive`
+--
+
+CREATE TABLE `user_archive` (
+  `archive_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `action_date` datetime DEFAULT NULL,
+  `old_value` varchar(255) DEFAULT NULL,
+  `new_value` varchar(255) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Déchargement des données de la table `user_archive`
+--
+
+INSERT INTO `user_archive` (`archive_id`, `user_id`, `action_date`, `old_value`, `new_value`) VALUES
+(1, 1, '2023-10-05 12:08:43', 'Nom: Dupont, Prénom: Jean', 'Nom: Dupont, Prénom: Patrick'),
+(2, 3, '2023-10-05 12:09:23', 'Nom: Garcia, Prénom: Luis', 'Nom: Pedro, Prénom: Luis');
 
 --
 -- Index pour les tables déchargées
@@ -203,6 +254,13 @@ ALTER TABLE `user`
   ADD PRIMARY KEY (`id_user`);
 
 --
+-- Index pour la table `user_archive`
+--
+ALTER TABLE `user_archive`
+  ADD PRIMARY KEY (`archive_id`),
+  ADD KEY `fk_user` (`user_id`);
+
+--
 -- AUTO_INCREMENT pour les tables déchargées
 --
 
@@ -210,7 +268,7 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT pour la table `actor`
 --
 ALTER TABLE `actor`
-  MODIFY `id_actor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_actor` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT pour la table `director`
@@ -222,13 +280,19 @@ ALTER TABLE `director`
 -- AUTO_INCREMENT pour la table `movie`
 --
 ALTER TABLE `movie`
-  MODIFY `id_movie` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_movie` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT pour la table `user`
 --
 ALTER TABLE `user`
   MODIFY `id_user` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT pour la table `user_archive`
+--
+ALTER TABLE `user_archive`
+  MODIFY `archive_id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- Contraintes pour les tables déchargées
@@ -253,6 +317,12 @@ ALTER TABLE `movie_actor`
 ALTER TABLE `movie_user`
   ADD CONSTRAINT `movie_user_ibfk_1` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`),
   ADD CONSTRAINT `movie_user_ibfk_2` FOREIGN KEY (`id_movie`) REFERENCES `movie` (`id_movie`);
+
+--
+-- Contraintes pour la table `user_archive`
+--
+ALTER TABLE `user_archive`
+  ADD CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `user` (`id_user`) ON DELETE RESTRICT ON UPDATE RESTRICT;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
